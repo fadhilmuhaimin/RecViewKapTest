@@ -3,31 +3,28 @@ package com.pluralsight.recviewkaptest.Adapter
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Paint
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewGroup.MarginLayoutParams
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.flexbox.AlignItems
-import com.google.android.flexbox.AlignSelf
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.kapcake.pos.Listener.AdapterListener
 import com.pluralsight.recviewkaptest.ItemPemesanan
 import com.pluralsight.recviewkaptest.R
+import com.pluralsight.recviewkaptest.Session
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.row_item_pemesanan.*
 import java.util.*
 
 
-class ItemPemesananListAdapter(
+class ItemPemesananAdapter(
     private val context: Context,
     private val items: List<ItemPemesanan>,
     private val listener: AdapterListener,
     private val parentHeight: Int,
     private val positionParent: Int
 )
-    : RecyclerView.Adapter<ItemPemesananListAdapter.ViewHolder>() {
+    : RecyclerView.Adapter<ItemPemesananAdapter.ViewHolder>() {
 
     var allDone = false
 
@@ -60,17 +57,32 @@ class ItemPemesananListAdapter(
             allDone: Boolean
         ) {
 
-            val parentHeight2 = 891
-            val cardHeight = 139
-            val bottomHeight = 62
-            val bottomIndex = 4
-            val bottomIndex2 = 6
+            var session = Session(context)
 
+//            val bottomIndex = 4
+//            val bottomIndex2 = 6
+            val bottomIndex = session.first_page?:0
+            val bottomIndex2 = session.next_page?:0
+
+            //fungsi default biar layoutnya ndak aneh
             val lp: ViewGroup.LayoutParams = flex.getLayoutParams()
             if (lp is FlexboxLayoutManager.LayoutParams) {
-                lp.flexGrow = 0.0f
+                lp.flexGrow = .0f
+                lp.isWrapBefore = false
             }
+            layout_bottom.setBackgroundColor(context.resources.getColor(R.color.gray1))
+            layout_bottom.setTextColor(context.resources.getColor(R.color.blue1))
 
+            if(position==(bottomIndex+1) ){
+                if (lp is FlexboxLayoutManager.LayoutParams) {
+                    lp.isWrapBefore = true
+                }
+            }
+            else if(position>0 && position>(bottomIndex2+bottomIndex) && ((position-bottomIndex)%bottomIndex2==1)){
+                if (lp is FlexboxLayoutManager.LayoutParams) {
+                    lp.isWrapBefore = true
+                }
+            }
 
             if (position == (itemCount - 1)) {
                 layout_bottom.visibility = View.VISIBLE
@@ -88,30 +100,14 @@ class ItemPemesananListAdapter(
                 layout_bottom.visibility = View.VISIBLE
                 layout_bottom.text = "Bersambung ->"
 
-//                if(layout_bottom.visibility == View.VISIBLE && position < (itemCount - 1) && layout_bottom.text.toString().contains("bersambung",true)){
-//                    val lp: ViewGroup.LayoutParams = flex.getLayoutParams()
-//                    if (lp is FlexboxLayoutManager.LayoutParams) {
-//                        val flexboxLp = lp
-//                        flexboxLp.flexGrow = 1.0f
-//                    }
-//                }
-
-                if (lp is FlexboxLayoutManager.LayoutParams) {
-                    lp.flexGrow = 1.0f
-                }
+                if (lp is FlexboxLayoutManager.LayoutParams) { lp.flexGrow = 1.0f }
             }
             //bottom page kedua
             else if(position>bottomIndex && (position-bottomIndex)%bottomIndex2==0) {
-
-                Log.d("Anjay",position.toString())
                 layout_bottom.visibility = View.VISIBLE
                 layout_bottom.text = "Bersambung ->"
 
-//                if(layout_bottom.visibility == View.VISIBLE && position < (itemCount - 1) && layout_bottom.text.toString().contains("bersambung",true)){
-                if (lp is FlexboxLayoutManager.LayoutParams) {
-                    lp.flexGrow = 1.0f
-                }
-//                }
+                if (lp is FlexboxLayoutManager.LayoutParams) { lp.flexGrow = 1.0f }
             }
             else {
                 layout_bottom.visibility = View.GONE
@@ -159,19 +155,16 @@ class ItemPemesananListAdapter(
                 tvKondisi.setPaintFlags(Paint.STRIKE_THRU_TEXT_FLAG)
                 tv_jumlah.setPaintFlags(Paint.STRIKE_THRU_TEXT_FLAG)
                 iv_2.visibility = View.VISIBLE
-
-                card.setOnClickListener(null)
             }
             else {
                 //aktifkan kalau misal bermasalah di recyclernya
 //                tvNama.setPaintFlags(tvNama.getPaintFlags() and Paint.STRIKE_THRU_TEXT_FLAG.inv())
                 iv_2.visibility = View.GONE
-                card.setOnClickListener {
-                    listener.clickItemPemesanan(data,it,position)
-                }
             }
 
-
+            card.setOnClickListener {
+                listener.clickItemPemesanan(data,it,position)
+            }
 
             if(layout_bottom.visibility == View.VISIBLE && layout_bottom.text.toString().toLowerCase(Locale.ROOT)=="tandai semua"){
                 layout_bottom.setOnClickListener {

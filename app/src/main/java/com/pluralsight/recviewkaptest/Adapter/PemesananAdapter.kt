@@ -2,7 +2,6 @@ package com.pluralsight.recviewkaptest.Adapter
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,12 +11,13 @@ import com.kapcake.pos.Listener.AdapterListener
 import com.pluralsight.recviewkaptest.ItemPemesanan
 import com.pluralsight.recviewkaptest.Pemesanan
 import com.pluralsight.recviewkaptest.R
+import com.pluralsight.recviewkaptest.Session
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.row_pemesanan.*
 
 
-class PemesananListAdapter(private val context: Context, private val items: List<Pemesanan>, private val listener: AdapterListener)
-    : RecyclerView.Adapter<PemesananListAdapter.ViewHolder>() {
+class PemesananAdapter(private val context: Context, private val items: List<Pemesanan>, private val listener: AdapterListener)
+    : RecyclerView.Adapter<PemesananAdapter.ViewHolder>() {
 
     var parentHeight : Int = 0
 
@@ -39,7 +39,7 @@ class PemesananListAdapter(private val context: Context, private val items: List
     class ViewHolder(override val containerView: View) : RecyclerView.ViewHolder(containerView),
             LayoutContainer, AdapterListener {
 
-        private var adapterItem : ItemPemesananListAdapter? = null
+        private var adapterItem : ItemPemesananAdapter? = null
         private var listItem : MutableList<ItemPemesanan>? = ArrayList()
 
         @SuppressLint("SetTextI18n", "SimpleDateFormat")
@@ -55,49 +55,7 @@ class PemesananListAdapter(private val context: Context, private val items: List
             listItem?.addAll(data.item)
 
 
-//            tvHarga.text = GeneralHelper.convertRupiah(data.total?.toDouble()?:0.0)
-//            tvId.text = "#"+data.no_pemesanan.toString()
-//
-//            var jumlah = 0
-//            for (item in data.item){
-//                jumlah+=item.jumlah?:0
-//            }
-//            tvJumlah.text = "$jumlah item"
-//            tvWaktu.text = data.waktu_simpan
-//
-//            if(data.nama_meja?.isNotBlank()==true){
-//                tvMeja.text = data.nama_meja+"-"+data.nama_kategori_meja
-//                tvMeja.visibility = View.VISIBLE
-//            }
-//            else {
-//                tvMeja.visibility = View.GONE
-//            }
-//
-//            if(data.is_selected) {
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                    root.setBackgroundColor(context.resources.getColor(R.color.gray6,null))
-//                }
-//                else {
-//                    root.setBackgroundColor(context.resources.getColor(R.color.gray6))
-//                }
-//            }
-//            else {
-//
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                    root.setBackgroundColor(context.resources.getColor(android.R.color.white,null))
-//                }
-//                else {
-//                    root.setBackgroundColor(context.resources.getColor(android.R.color.white))
-//                }
-//            }
-//
-//            containerView.setOnClickListener {
-//                viewModel.updateCurrentPemesanan(data)
-//            }
-
-
-
-            adapterItem = listItem?.let { ItemPemesananListAdapter(context, it,this,parentHeight,position) }
+            adapterItem = listItem?.let { ItemPemesananAdapter(context, it,this,parentHeight,position) }
             val layoutManager2 = FlexboxLayoutManager(context)
             layoutManager2.flexDirection = FlexDirection.COLUMN
             layoutManager2.justifyContent = JustifyContent.FLEX_START
@@ -115,12 +73,17 @@ class PemesananListAdapter(private val context: Context, private val items: List
             super.clickItemPemesanan(data, view, position)
             when(view.id){
                 R.id.card -> {
-                    data.selected = true
+
+                    data.selected = !data.selected
                     adapterItem?.notifyItemChanged(position)
 
                     //cek kalau sudah complete alldone
                     if(listItem?.any { it.selected==false }==false) {
                         adapterItem?.allDone = true
+                        adapterItem?.notifyDataSetChanged()
+                    }
+                    else if(adapterItem?.allDone == true) {
+                        adapterItem?.allDone = false
                         adapterItem?.notifyDataSetChanged()
                     }
 
